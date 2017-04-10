@@ -369,7 +369,7 @@ thread_get_priority (void)
 }
 
 bool thread_compare_by_priority (const struct list_elem *a,
-                                 const struct list_elem *b, void *aux)
+                                 const struct list_elem *b, void *aux UNUSED)
 {
   return (thread_entry (a)->priority > thread_entry (b)->priority);
 }
