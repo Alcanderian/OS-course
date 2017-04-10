@@ -254,13 +254,11 @@ thread_unblock (struct thread *t)
 void thread_check (struct thread *t, void *aux UNUSED)
 {
   if (t->status == THREAD_BLOCKED && t->blocked_ticks > 0)
-  {
-    t->blocked_ticks--;
-    if (t->blocked_ticks == 0)
     {
-      thread_unblock (t);
+      t->blocked_ticks--;
+      if (t->blocked_ticks == 0)
+        thread_unblock (t);
     }
-  }
 }
 
 /* Returns the name of the running thread. */
@@ -368,8 +366,9 @@ thread_get_priority (void)
   return thread_current ()->priority;
 }
 
-bool thread_compare_by_priority (const struct list_elem *a,
-                                 const struct list_elem *b, void *aux UNUSED)
+bool
+thread_compare_by_priority (const struct list_elem *a,
+                            const struct list_elem *b, void *aux UNUSED)
 {
   return (thread_entry (a)->priority > thread_entry (b)->priority);
 }
@@ -486,7 +485,7 @@ init_thread (struct thread *t, const char *name, int priority)
 
   memset (t, 0, sizeof *t);
   t->status = THREAD_BLOCKED;
-	t->blocked_ticks = 0;
+  t->blocked_ticks = 0;
   strlcpy (t->name, name, sizeof t->name);
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
