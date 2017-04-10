@@ -245,7 +245,7 @@ thread_unblock (struct thread *t)
 
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
-  list_insert_ordered (&ready_list, &t->elem, thrad_compare_by_priority, NULL);
+  list_insert_ordered (&ready_list, &t->elem, thread_compare_by_priority, NULL);
   /* list_push_back(&ready_list, &t->elem); */
   t->status = THREAD_READY;
   intr_set_level (old_level);
@@ -329,7 +329,7 @@ thread_yield (void)
 
   old_level = intr_disable ();
   if (cur != idle_thread)
-    list_insert_ordered (&ready_list, &cur->elem, thrad_compare_by_priority,
+    list_insert_ordered (&ready_list, &cur->elem, thread_compare_by_priority,
                          NULL);
   /* list_push_back(&ready_list, &cur->elem); */
   cur->status = THREAD_READY;
@@ -368,8 +368,8 @@ thread_get_priority (void)
   return thread_current ()->priority;
 }
 
-list_less_func thrad_compare_by_priority (const struct list_elem *a,
-                                          const struct list_elem *b, void *aux)
+bool thread_compare_by_priority (const struct list_elem *a,
+                                 const struct list_elem *b, void *aux)
 {
   return (thread_entry (a)->priority > thread_entry (b)->priority);
 }
@@ -491,7 +491,8 @@ init_thread (struct thread *t, const char *name, int priority)
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
   t->magic = THREAD_MAGIC;
-  list_insert_ordered (&all_list, &t->allelem, thrad_compare_by_priority, NULL);
+  list_insert_ordered (&all_list, &t->allelem, thread_compare_by_priority,
+                       NULL);
   /* list_push_back(&all_list, &t->allelem); */
 }
 
