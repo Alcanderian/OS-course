@@ -87,7 +87,7 @@ timer_elapsed (int64_t then)
 /* Sleeps for approximately TICKS timer ticks.  Interrupts must
    be turned on. */
 void
-timer_sleep(int64_t ticks) //FIXME
+timer_sleep (int64_t ticks)
 {
   int64_t start = timer_ticks ();
   enum intr_level old_level;
@@ -174,7 +174,7 @@ timer_print_stats (void)
 
 /* Timer interrupt handler. */
 static void
-timer_interrupt(struct intr_frame *args UNUSED) //FIXME
+timer_interrupt (struct intr_frame *args UNUSED)
 {
   ticks++;
   thread_tick ();
