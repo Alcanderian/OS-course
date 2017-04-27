@@ -103,7 +103,7 @@ struct thread
     unsigned magic;                     /* Detects stack overflow. */
   };
 
-#define thread_entry(LIST_ELEM) (list_entry (LIST_ELEM, struct thread, elem))
+#define thread_entry(LIST_ELEM) (list_entry (LIST_ELEM, struct thread, allelem))
 
 /* If false (default), use round-robin scheduler.
    If true, use multi-level feedback queue scheduler.
@@ -129,8 +129,7 @@ const char *thread_name (void);
 
 void thread_exit (void) NO_RETURN;
 void thread_yield (void);
-void
-thread_preempt (void);
+void thread_preempt (void);
 
 /* Performs some operation on thread t, given auxiliary data AUX. */
 typedef void thread_action_func (struct thread *t, void *aux);
