@@ -103,7 +103,7 @@ struct thread
     unsigned magic;                     /* Detects stack overflow. */
   };
 
-#define thread_entry(LIST_ELEM) (list_entry (LIST_ELEM, struct thread, allelem))
+#define thread_entry(LIST_ELEM) (list_entry (LIST_ELEM, struct thread, elem))
 
 /* If false (default), use round-robin scheduler.
    If true, use multi-level feedback queue scheduler.
