@@ -346,10 +346,10 @@ thread_preempt (void) {
   struct thread *maybe_next;
   enum intr_level old_level;
 
-  ASSERT(!intr_context ());
+  ASSERT (!intr_context ());
 
   old_level = intr_disable ();
-  maybe_next = list_entry (list_begin (&ready_list), struct thread, elem);
+  maybe_next = thread_entry (list_begin (&ready_list));
   if (cur->priority < maybe_next->priority)
     thread_yield ();
   intr_set_level (old_level);
