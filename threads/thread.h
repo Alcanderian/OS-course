@@ -20,9 +20,12 @@ typedef int tid_t;
 #define TID_ERROR ((tid_t) -1)          /* Error value for tid_t. */
 
 /* Thread priorities. */
-#define PRI_MIN 0                       /* Lowest priority. */
-#define PRI_DEFAULT 31                  /* Default priority. */
-#define PRI_MAX 63                      /* Highest priority. */
+/* By alcanderian */
+#define PRI_INVALID (-1)                  /* Null/invalid priority. */
+/* By alcanderian */
+#define PRI_MIN (0)                       /* Lowest priority. */
+#define PRI_DEFAULT (31)                  /* Default priority. */
+#define PRI_MAX (63)                      /* Highest priority. */
 
 /* A kernel thread or user process.
 
@@ -85,9 +88,13 @@ struct thread
     /* Owned by thread.c. */
     tid_t tid;                          /* Thread identifier. */
     enum thread_status status;          /* Thread state. */
-    /* by alcanderian */
-    int blocked_ticks;                  /* Ticks the thread should block */
-    /* by alcanderian */
+    /* By alcanderian */
+    int blocked_ticks;                  /* Ticks the thread should block. */
+    int prev_priority;                  /* Priority before being donated. */
+    struct list locks;                  /* Lock list held by thread. */
+    struct lock *donating;              /* The lock this thread is donating. */
+    bool donated;                       /* Has thread been donated. */
+    /* By alcanderian */
     char name[16];                      /* Name (for debugging purposes). */
     uint8_t *stack;                     /* Saved stack pointer. */
     int priority;                       /* Priority. */
@@ -105,9 +112,9 @@ struct thread
     unsigned magic;                     /* Detects stack overflow. */
   };
 
-/* by alcanderian */
+/* By alcanderian */
 #define thread_entry(LIST_ELEM) (list_entry (LIST_ELEM, struct thread, elem))
-/* by alcanderian */
+/* By alcanderian */
 
 /* If false (default), use round-robin scheduler.
    If true, use multi-level feedback queue scheduler.
@@ -133,9 +140,9 @@ const char *thread_name (void);
 
 void thread_exit (void) NO_RETURN;
 void thread_yield (void);
-/* by alcanderian */
+/* By alcanderian */
 void thread_preempt (void);
-/* by alcanderian */
+/* By alcanderian */
 
 /* Performs some operation on thread t, given auxiliary data AUX. */
 typedef void thread_action_func (struct thread *t, void *aux);
@@ -143,11 +150,11 @@ void thread_foreach (thread_action_func *, void *);
 
 int thread_get_priority (void);
 void thread_set_priority (int);
-/* by alcanderian */
+/* By alcanderian */
 bool thread_compare_by_priority (const struct list_elem *a,
                                  const struct list_elem *b,
                                  void *aux UNUSED);
-/* by alcanderian */
+/* By alcanderian */
 
 int thread_get_nice (void);
 void thread_set_nice (int);
