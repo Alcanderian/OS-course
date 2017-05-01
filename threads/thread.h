@@ -85,7 +85,9 @@ struct thread
     /* Owned by thread.c. */
     tid_t tid;                          /* Thread identifier. */
     enum thread_status status;          /* Thread state. */
-	int blocked_ticks; /* Ticks the thread should block */
+    /* by alcanderian */
+    int blocked_ticks;                  /* Ticks the thread should block */
+    /* by alcanderian */
     char name[16];                      /* Name (for debugging purposes). */
     uint8_t *stack;                     /* Saved stack pointer. */
     int priority;                       /* Priority. */
@@ -103,7 +105,9 @@ struct thread
     unsigned magic;                     /* Detects stack overflow. */
   };
 
+/* by alcanderian */
 #define thread_entry(LIST_ELEM) (list_entry (LIST_ELEM, struct thread, elem))
+/* by alcanderian */
 
 /* If false (default), use round-robin scheduler.
    If true, use multi-level feedback queue scheduler.
@@ -129,7 +133,9 @@ const char *thread_name (void);
 
 void thread_exit (void) NO_RETURN;
 void thread_yield (void);
+/* by alcanderian */
 void thread_preempt (void);
+/* by alcanderian */
 
 /* Performs some operation on thread t, given auxiliary data AUX. */
 typedef void thread_action_func (struct thread *t, void *aux);
@@ -137,9 +143,11 @@ void thread_foreach (thread_action_func *, void *);
 
 int thread_get_priority (void);
 void thread_set_priority (int);
+/* by alcanderian */
 bool thread_compare_by_priority (const struct list_elem *a,
-                                          const struct list_elem *b,
-                                          void *aux UNUSED);
+                                 const struct list_elem *b,
+                                 void *aux UNUSED);
+/* by alcanderian */
 
 int thread_get_nice (void);
 void thread_set_nice (int);
