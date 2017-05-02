@@ -254,7 +254,7 @@ thread_unblock (struct thread *t)
 }
 
 void
-thread_check_block (struct thread *t, void *aux UNUSED)
+thread_update_block (struct thread *t, void *aux UNUSED)
 {
   if (t->status == THREAD_BLOCKED && t->blocked_ticks > 0)
     {
@@ -265,7 +265,7 @@ thread_check_block (struct thread *t, void *aux UNUSED)
 }
 
 void
-thread_check_lock (struct thread *t, void *aux UNUSED)
+thread_update_lock (struct thread *t, void *aux UNUSED)
 {
   struct thread *cur = thread_current ();
   int lock_priority = PRI_MIN;
@@ -401,7 +401,7 @@ thread_set_priority (int new_priority)
 {
   struct thread *cur = thread_current ();
   cur->prev_priority = new_priority;
-  thread_check_lock (cur, NULL);
+  thread_update_lock (cur, NULL);
   thread_preempt ();
 }
 

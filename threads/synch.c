@@ -232,7 +232,7 @@ lock_acquire (struct lock *lock)
            chain = chain->holder->waiting_lock)
         {
           chain->priority = cur->priority;
-          thread_check_lock (chain->holder, NULL);
+          thread_update_lock (chain->holder, NULL);
         }
     }
   intr_set_level (old_level);
@@ -276,7 +276,7 @@ lock_release (struct lock *lock)
   ASSERT (lock_held_by_current_thread (lock));
 
   list_remove (&lock->hook);
-  thread_check_lock (thread_current (), NULL);
+  thread_update_lock (thread_current (), NULL);
   lock->holder = NULL;
   lock->priority = PRI_MIN;
   sema_up (&lock->semaphore);
