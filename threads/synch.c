@@ -183,6 +183,7 @@ lock_init (struct lock *lock)
   ASSERT (lock != NULL);
 
   lock->holder = NULL;
+  lock->priority = PRI_INVALID;
   sema_init (&lock->semaphore, 1);
 }
 
@@ -200,7 +201,7 @@ lock_acquire (struct lock *lock)
   ASSERT (lock != NULL);
   ASSERT (!intr_context ());
   ASSERT (!lock_held_by_current_thread (lock));
-
+  /* FIXME */
   sema_down (&lock->semaphore);
   lock->holder = thread_current ();
 }
@@ -235,8 +236,9 @@ lock_release (struct lock *lock)
 {
   ASSERT (lock != NULL);
   ASSERT (lock_held_by_current_thread (lock));
-
+  /* FIXME */
   lock->holder = NULL;
+  lock->priority = PRI_INVALID;
   sema_up (&lock->semaphore);
 }
 
@@ -249,6 +251,13 @@ lock_held_by_current_thread (const struct lock *lock)
   ASSERT (lock != NULL);
 
   return lock->holder == thread_current ();
+}
+
+bool
+lock_compare_by_priority (const struct list_elem *a, const struct list_elem *b,
+                          void *aux UNUSED)
+{
+  return (lock_entry (a)->priority > lock_entry (b)->priority);
 }
 
 /* One semaphore in a list. */

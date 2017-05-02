@@ -91,9 +91,8 @@ struct thread
     /* By alcanderian */
     int blocked_ticks;                  /* Ticks the thread should block. */
     int prev_priority;                  /* Priority before being donated. */
-    struct list locks;                  /* Lock list held by thread. */
-    struct lock *donating;              /* The lock this thread is donating. */
-    bool donated;                       /* Has thread been donated. */
+    struct list holding_lock;           /* Lock list held by thread. */
+    struct lock *waiting_lock;          /* The lock this thread is waiting. */
     /* By alcanderian */
     char name[16];                      /* Name (for debugging purposes). */
     uint8_t *stack;                     /* Saved stack pointer. */
@@ -132,7 +131,10 @@ tid_t thread_create (const char *name, int priority, thread_func *, void *);
 
 void thread_block (void);
 void thread_unblock (struct thread *);
-void thread_check (struct thread *t, void *aux UNUSED);
+/* By alcanderian */
+void thread_check_block (struct thread *, void *);
+void thread_check_lock (struct thread *, void *);
+/* By alcanderian */
 
 struct thread *thread_current (void);
 tid_t thread_tid (void);
@@ -151,9 +153,9 @@ void thread_foreach (thread_action_func *, void *);
 int thread_get_priority (void);
 void thread_set_priority (int);
 /* By alcanderian */
-bool thread_compare_by_priority (const struct list_elem *a,
-                                 const struct list_elem *b,
-                                 void *aux UNUSED);
+bool thread_compare_by_priority (const struct list_elem *,
+                                 const struct list_elem *,
+                                 void *);
 /* By alcanderian */
 
 int thread_get_nice (void);

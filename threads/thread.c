@@ -252,7 +252,7 @@ thread_unblock (struct thread *t)
   intr_set_level (old_level);
 }
 
-void thread_check (struct thread *t, void *aux UNUSED)
+void thread_check_block (struct thread *t, void *aux UNUSED)
 {
   if (t->status == THREAD_BLOCKED && t->blocked_ticks > 0)
     {
@@ -260,6 +260,11 @@ void thread_check (struct thread *t, void *aux UNUSED)
       if (t->blocked_ticks == 0)
         thread_unblock (t);
     }
+}
+
+void thread_check_lock (struct thread *t, void *aux UNUSED)
+{
+  /* TODO */
 }
 
 /* Returns the name of the running thread. */
@@ -376,7 +381,15 @@ thread_foreach (thread_action_func *func, void *aux)
 void
 thread_set_priority (int new_priority)
 {
-  thread_current ()->priority = new_priority;
+  struct thread *cur = thread_current ();
+  if(cur->prev_priority == PRI_INVALID)
+    cur->priority = new_priority;
+  else
+    {
+      cur->prev_priority = new_priority;
+      thread_check_lock (cur, NULL);
+    }
+  /* XXX May need fix. */
   thread_preempt ();
 }
 
@@ -510,6 +523,8 @@ init_thread (struct thread *t, const char *name, int priority)
   strlcpy (t->name, name, sizeof t->name);
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
+  t->prev_priority = PRI_INVALID;
+  t->waiting_lock = NULL;
   t->magic = THREAD_MAGIC;
   list_insert_ordered (&all_list, &t->allelem, thread_compare_by_priority,
                        NULL);
