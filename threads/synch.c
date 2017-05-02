@@ -229,7 +229,7 @@ lock_acquire (struct lock *lock)
            chain = chain->holder->waiting_lock)
         {
           chain->priority = cur->priority;
-          thread_check_lock (chain, NULL);
+          thread_check_lock (chain->holder, NULL);
         }
     }
   intr_set_level (old_level);
