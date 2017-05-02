@@ -539,8 +539,7 @@ init_thread (struct thread *t, const char *name, int priority)
   t->waiting_lock = NULL;
   t->magic = THREAD_MAGIC;
   /* No need to use LIST_INSERT_ORDERED. */
-  list_insert_ordered (&all_list, &t->allelem, thread_compare_by_priority,
-                       NULL);
+  list_insert_ordered (&all_list, &t->allelem);
 }
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack and
