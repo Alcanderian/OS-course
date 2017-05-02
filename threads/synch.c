@@ -183,7 +183,7 @@ lock_init (struct lock *lock)
   ASSERT (lock != NULL);
 
   lock->holder = NULL;
-  lock->priority = PRI_INVALID;
+  lock->priority = PRI_MIN;
   sema_init (&lock->semaphore, 1);
 }
 
@@ -198,12 +198,47 @@ lock_init (struct lock *lock)
 void
 lock_acquire (struct lock *lock)
 {
+  /* It is no good to use codes gave by TAs:
+
+       struct thread *curr = thread_current ();
+       struct thread *thrd = lock->holder;
+       struct lock *another = lock;
+       curr->blocked = another;
+
+       while (thrd != NULL && curr->priority > thrd->priority)
+         {
+           Not yet implememted.
+         }
+
+     Reason: thrd != NULL is the begin condition but not the end
+     condition.  The end condition is: another != NULL. So, we should
+     use lock to iterate donate chain, but not thread. */
+  struct thread *cur = thread_current ();
+  struct lock *chain;
+  enum intr_level old_level;
+
   ASSERT (lock != NULL);
   ASSERT (!intr_context ());
   ASSERT (!lock_held_by_current_thread (lock));
-  /* FIXME */
+
+  old_level = intr_disable ();
+  if (lock->holder != NULL)
+    {
+      cur->waiting_lock = lock;
+      for (chain = lock; chain != NULL && chain->priority < cur->priority;
+           chain = chain->holder->waiting_lock)
+        {
+          chain->priority = cur->priority;
+          thread_check_lock (chain, NULL);
+        }
+    }
+  intr_set_level (old_level);
+
   sema_down (&lock->semaphore);
-  lock->holder = thread_current ();
+  lock->holder = cur;
+  cur->waiting_lock = NULL;
+  list_push_back (&cur->holding_lock, &lock->hook);
+  /* XXX Function: lock_acquire */
 }
 
 /* Tries to acquires LOCK and returns true if successful or false
@@ -236,10 +271,13 @@ lock_release (struct lock *lock)
 {
   ASSERT (lock != NULL);
   ASSERT (lock_held_by_current_thread (lock));
-  /* FIXME */
+
+  list_remove (&lock->hook);
+  thread_check_lock (thread_current (), NULL);
   lock->holder = NULL;
-  lock->priority = PRI_INVALID;
+  lock->priority = PRI_MIN;
   sema_up (&lock->semaphore);
+  /* XXX Function: lock_release */
 }
 
 /* Returns true if the current thread holds LOCK, false
@@ -258,6 +296,27 @@ lock_compare_by_priority (const struct list_elem *a, const struct list_elem *b,
                           void *aux UNUSED)
 {
   return (lock_entry (a)->priority > lock_entry (b)->priority);
+}
+
+/* Invoke function 'func' on list, passing along 'aux'.
+   This function must be called with interrupts off. */
+void
+lock_foreach (struct list *list, lock_action_func *func, void *aux)
+{
+  struct list_elem *e;
+
+  ASSERT (intr_get_level () == INTR_OFF);
+
+  for (e = list_begin (list); e != list_end (list); e = list_next (e))
+    func (lock_entry (e), aux);
+}
+
+void
+lock_get_higher_priority (struct lock *l, void *int_priority)
+{
+  int *priority = int_priority;
+  if (l->priority > *priority)
+    *priority = l->priority;
 }
 
 /* One semaphore in a list. */

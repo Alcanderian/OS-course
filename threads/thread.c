@@ -11,6 +11,7 @@
 #include "threads/switch.h"
 #include "threads/synch.h"
 #include "threads/vaddr.h"
+#include "threads/algori.h"
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
@@ -252,7 +253,8 @@ thread_unblock (struct thread *t)
   intr_set_level (old_level);
 }
 
-void thread_check_block (struct thread *t, void *aux UNUSED)
+void
+thread_check_block (struct thread *t, void *aux UNUSED)
 {
   if (t->status == THREAD_BLOCKED && t->blocked_ticks > 0)
     {
@@ -263,37 +265,21 @@ void thread_check_block (struct thread *t, void *aux UNUSED)
 }
 
 void
-thread_check_lock (struct thread *t, void *aux UNUSED) {
-  int lock_priority = PRI_INVALID;
+thread_check_lock (struct thread *t, void *aux UNUSED)
+{
   struct thread *cur = thread_current ();
+  int lock_priority = PRI_MIN;
   enum intr_level old_level;
 
   ASSERT (!intr_context ());
 
   old_level = intr_disable ();
-  /* Read priority */
-  if (!list_empty (&t->holding_lock))
-    {
-      /* We cannot use LIST_INSERT_ORDERED, because
-         the elem has already in the list. */
-      list_sort (&t->holding_lock, lock_compare_by_priority, NULL);
-      lock_priority = lock_entry (list_begin (&t->holding_lock))->priority;
-    }
-  /* Check priority */
-  if (lock_priority > t->priority)
-    {
-      t->prev_priority = t->priority;
-      t->priority = lock_priority;
-    }
-  else
-    {
-      t->priority = t->prev_priority;
-      t->prev_priority = PRI_INVALID;
-    }
+  lock_foreach (&t->holding_lock, lock_get_higher_priority, &lock_priority);
+  max (&t->priority, &lock_priority, &t->prev_priority);
   /* For efficency, we better check if t is current thread.
-     We should sort ready list rather than using insert ordered,
+     We should use LIST_SORT rather than LIST_INSERT_ORDERED,
      because thread *t has already in the ready list. */
-  if(t != cur)
+  if (t != cur)
     list_sort (&ready_list, thread_compare_by_priority, NULL);
   /* XXX Function: thread_check_lock */
   intr_set_level (old_level);
@@ -373,7 +359,7 @@ thread_yield (void)
   intr_set_level (old_level);
 }
 
-/* Only worked with thread priority enabled. Compare current thread with
+/* Only worked with thread priority enabled.  Compare current thread with
  * the first thread in ready list, if current thread's priority is lower,
  * then it will yield.
  */
@@ -414,14 +400,8 @@ void
 thread_set_priority (int new_priority)
 {
   struct thread *cur = thread_current ();
-  cur->priority = new_priority;
-  if (cur->prev_priority != PRI_INVALID)
-    {
-      /* We also have to renew the prev_priority */
-      cur->prev_priority = new_priority;
-      thread_check_lock (cur, NULL);
-    }
-  /* XXX Function: thread_set_priority */
+  cur->prev_priority = new_priority;
+  thread_check_lock (cur, NULL);
   thread_preempt ();
 }
 
@@ -555,12 +535,11 @@ init_thread (struct thread *t, const char *name, int priority)
   strlcpy (t->name, name, sizeof t->name);
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
-  t->prev_priority = PRI_INVALID;
+  t->prev_priority = priority;
   t->waiting_lock = NULL;
   t->magic = THREAD_MAGIC;
-  list_insert_ordered (&all_list, &t->allelem, thread_compare_by_priority,
-                       NULL);
-  /* list_push_back(&all_list, &t->allelem); */
+  /* No need to use LIST_INSERT_ORDERED. */
+  list_push_back(&all_list, &t->allelem);
 }
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack and
