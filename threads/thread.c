@@ -262,9 +262,41 @@ void thread_check_block (struct thread *t, void *aux UNUSED)
     }
 }
 
-void thread_check_lock (struct thread *t, void *aux UNUSED)
-{
-  /* TODO */
+void
+thread_check_lock (struct thread *t, void *aux UNUSED) {
+  int lock_priority = PRI_INVALID;
+  struct thread *cur = thread_current ();
+  enum intr_level old_level;
+
+  ASSERT (!intr_context ());
+
+  old_level = intr_disable ();
+  /* Read priority */
+  if (!list_empty (&t->holding_lock))
+    {
+      /* We cannot use LIST_INSERT_ORDERED, because
+         the elem has already in the list. */
+      list_sort (&t->holding_lock, lock_compare_by_priority, NULL);
+      lock_priority = lock_entry (list_begin (&t->holding_lock))->priority;
+    }
+  /* Check priority */
+  if (lock_priority > t->priority)
+    {
+      t->prev_priority = t->priority;
+      t->priority = lock_priority;
+    }
+  else
+    {
+      t->priority = t->prev_priority;
+      t->prev_priority = PRI_INVALID;
+    }
+  /* For efficency, we better check if t is current thread.
+     We should sort ready list rather than using insert ordered,
+     because thread *t has already in the ready list. */
+  if(t != cur)
+    list_sort (&ready_list, thread_compare_by_priority, NULL);
+  /* XXX Function: thread_check_lock */
+  intr_set_level (old_level);
 }
 
 /* Returns the name of the running thread. */
@@ -382,14 +414,10 @@ void
 thread_set_priority (int new_priority)
 {
   struct thread *cur = thread_current ();
-  if(cur->prev_priority == PRI_INVALID)
-    cur->priority = new_priority;
-  else
-    {
-      cur->prev_priority = new_priority;
-      thread_check_lock (cur, NULL);
-    }
-  /* XXX May need fix. */
+  cur->priority = new_priority;
+  if (cur->prev_priority != PRI_INVALID)
+    thread_check_lock (cur, NULL);
+  /* XXX Function: thread_set_priority */
   thread_preempt ();
 }
 
