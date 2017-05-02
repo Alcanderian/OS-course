@@ -11,7 +11,6 @@
 #include "threads/switch.h"
 #include "threads/synch.h"
 #include "threads/vaddr.h"
-#include "./algori.h"
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
@@ -71,6 +70,7 @@ static void *alloc_frame (struct thread *, size_t size);
 static void schedule (void);
 void thread_schedule_tail (struct thread *prev);
 static tid_t allocate_tid (void);
+void max (int *, const int *, const int *);
 
 /* Initializes the threading system by transforming the code
    that's currently running into a thread.  This can't work in
@@ -650,6 +650,14 @@ allocate_tid (void)
   lock_release (&tid_lock);
 
   return tid;
+}
+
+/* Get max value in most efficent way.
+   In c++:
+     *a = max(*b, *c) */
+void
+max (int *a, const int *b, const int *c) {
+  *a = *b > *c ? *b : *c;
 }
 
 /* Offset of `stack' member within `struct thread'.
