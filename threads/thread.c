@@ -537,6 +537,7 @@ init_thread (struct thread *t, const char *name, int priority)
   t->priority = priority;
   t->prev_priority = priority;
   t->waiting_lock = NULL;
+  list_init (&t->holding_lock);
   t->magic = THREAD_MAGIC;
   /* No need to use LIST_INSERT_ORDERED. */
   list_insert_ordered (&all_list, &t->allelem);
