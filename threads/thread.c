@@ -416,7 +416,11 @@ thread_set_priority (int new_priority)
   struct thread *cur = thread_current ();
   cur->priority = new_priority;
   if (cur->prev_priority != PRI_INVALID)
-    thread_check_lock (cur, NULL);
+    {
+      /* We also have to renew the prev_priority */
+      cur->prev_priority = new_priority;
+      thread_check_lock (cur, NULL);
+    }
   /* XXX Function: thread_set_priority */
   thread_preempt ();
 }
