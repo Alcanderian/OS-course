@@ -39,9 +39,6 @@ bool lock_try_acquire (struct lock *);
 void lock_release (struct lock *);
 bool lock_held_by_current_thread (const struct lock *);
 /* By alcanderian */
-bool lock_compare_by_priority (const struct list_elem *,
-                               const struct list_elem *,
-                               void *);
 typedef void lock_action_func (struct lock *, void *);
 void lock_foreach (struct list *, lock_action_func *, void *);
 void lock_get_higher_priority (struct lock *, void *);

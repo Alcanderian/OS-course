@@ -119,7 +119,7 @@ sema_up (struct semaphore *sema)
     {
       /* Using LIST_SORT is comfirmed more useful, because
          thread's priority maybe change among sema operations. */
-      list_sort (&sema->waiters, thread_compare_by_priority, NULL);
+      list_sort (&sema->waiters, thread_great_priority, NULL);
       thread_unblock (list_entry (list_pop_front (&sema->waiters),
                                   struct thread, elem));
     }
@@ -232,7 +232,7 @@ lock_acquire (struct lock *lock)
            chain = chain->holder->waiting_lock)
         {
           chain->priority = cur->priority;
-          thread_update_lock (chain->holder, NULL);
+          thread_update_priority (chain->holder, NULL);
         }
     }
   intr_set_level (old_level);
@@ -241,7 +241,6 @@ lock_acquire (struct lock *lock)
   lock->holder = cur;
   cur->waiting_lock = NULL;
   list_push_back (&cur->holding_lock, &lock->hook);
-  /* XXX Function: lock_acquire */
 }
 
 /* Tries to acquires LOCK and returns true if successful or false
@@ -276,11 +275,10 @@ lock_release (struct lock *lock)
   ASSERT (lock_held_by_current_thread (lock));
 
   list_remove (&lock->hook);
-  thread_update_lock (thread_current (), NULL);
+  thread_update_priority (thread_current (), NULL);
   lock->holder = NULL;
   lock->priority = PRI_MIN;
   sema_up (&lock->semaphore);
-  /* XXX Function: lock_release */
 }
 
 /* Returns true if the current thread holds LOCK, false
@@ -292,13 +290,6 @@ lock_held_by_current_thread (const struct lock *lock)
   ASSERT (lock != NULL);
 
   return lock->holder == thread_current ();
-}
-
-bool
-lock_compare_by_priority (const struct list_elem *a, const struct list_elem *b,
-                          void *aux UNUSED)
-{
-  return (lock_entry (a)->priority > lock_entry (b)->priority);
 }
 
 /* Invoke function 'func' on list, passing along 'aux'.

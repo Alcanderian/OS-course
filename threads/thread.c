@@ -247,7 +247,7 @@ thread_unblock (struct thread *t)
 
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
-  list_insert_ordered (&ready_list, &t->elem, thread_compare_by_priority, NULL);
+  list_insert_ordered (&ready_list, &t->elem, thread_great_priority, NULL);
   /* list_push_back(&ready_list, &t->elem); */
   t->status = THREAD_READY;
   intr_set_level (old_level);
@@ -265,7 +265,7 @@ thread_update_block (struct thread *t, void *aux UNUSED)
 }
 
 void
-thread_update_lock (struct thread *t, void *aux UNUSED)
+thread_update_priority (struct thread *t, void *aux UNUSED)
 {
   struct thread *cur = thread_current ();
   int lock_priority = PRI_MIN;
@@ -276,12 +276,9 @@ thread_update_lock (struct thread *t, void *aux UNUSED)
   old_level = intr_disable ();
   lock_foreach (&t->holding_lock, lock_get_higher_priority, &lock_priority);
   max (&t->priority, &lock_priority, &t->prev_priority);
-  /* For efficency, we better check if t is current thread.
-     We should use LIST_SORT rather than LIST_INSERT_ORDERED,
-     because thread *t has already in the ready list. */
+  /* It t != cur, it may in ready list or waiter list. */
   if (t != cur)
-    list_sort (&ready_list, thread_compare_by_priority, NULL);
-  /* XXX Function: thread_check_lock */
+    list_sort (&ready_list, thread_great_priority, NULL);
   intr_set_level (old_level);
 }
 
@@ -351,7 +348,7 @@ thread_yield (void)
 
   old_level = intr_disable ();
   if (cur != idle_thread)
-    list_insert_ordered (&ready_list, &cur->elem, thread_compare_by_priority,
+    list_insert_ordered (&ready_list, &cur->elem, thread_great_priority,
                          NULL);
   /* list_push_back(&ready_list, &cur->elem); */
   cur->status = THREAD_READY;
@@ -401,7 +398,7 @@ thread_set_priority (int new_priority)
 {
   struct thread *cur = thread_current ();
   cur->prev_priority = new_priority;
-  thread_update_lock (cur, NULL);
+  thread_update_priority (cur, NULL);
   thread_preempt ();
 }
 
@@ -413,8 +410,8 @@ thread_get_priority (void)
 }
 
 bool
-thread_compare_by_priority (const struct list_elem *a,
-                            const struct list_elem *b, void *aux UNUSED)
+thread_great_priority (const struct list_elem *a,
+                       const struct list_elem *b, void *aux UNUSED)
 {
   return (thread_entry (a)->priority > thread_entry (b)->priority);
 }

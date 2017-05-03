@@ -130,7 +130,7 @@ void thread_block (void);
 void thread_unblock (struct thread *);
 /* By alcanderian */
 void thread_update_block (struct thread *, void *);
-void thread_update_lock (struct thread *, void *);
+void thread_update_priority (struct thread *, void *);
 /* By alcanderian */
 
 struct thread *thread_current (void);
@@ -150,9 +150,9 @@ void thread_foreach (thread_action_func *, void *);
 int thread_get_priority (void);
 void thread_set_priority (int);
 /* By alcanderian */
-bool thread_compare_by_priority (const struct list_elem *,
-                                 const struct list_elem *,
-                                 void *);
+bool thread_great_priority (const struct list_elem *,
+                            const struct list_elem *,
+                            void *);
 /* By alcanderian */
 
 int thread_get_nice (void);
