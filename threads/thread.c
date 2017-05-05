@@ -70,7 +70,9 @@ static void *alloc_frame (struct thread *, size_t size);
 static void schedule (void);
 void thread_schedule_tail (struct thread *prev);
 static tid_t allocate_tid (void);
-void max (int *, const int *, const int *);
+
+/* Macro functions. */
+#define max(a, b, c) (a) = ((b) > (c)) ? (b) : (c)
 
 /* Initializes the threading system by transforming the code
    that's currently running into a thread.  This can't work in
@@ -275,7 +277,7 @@ thread_update_priority (struct thread *t, void *aux UNUSED)
 
   old_level = intr_disable ();
   lock_foreach (&t->holding_lock, lock_get_higher_priority, &lock_priority);
-  max (&t->priority, &lock_priority, &t->prev_priority);
+  max (t->priority, lock_priority, t->prev_priority);
   /* It t != cur, it may in ready list or waiter list. */
   if (t != cur)
     list_sort (&ready_list, thread_great_priority, NULL);
@@ -648,14 +650,6 @@ allocate_tid (void)
   lock_release (&tid_lock);
 
   return tid;
-}
-
-/* Get max value in most efficent way.
-   In c++:
-     *a = max(*b, *c) */
-void
-max (int *a, const int *b, const int *c) {
-  *a = *b > *c ? *b : *c;
 }
 
 /* Offset of `stack' member within `struct thread'.
