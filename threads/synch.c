@@ -31,6 +31,7 @@
 #include <string.h>
 #include "threads/interrupt.h"
 #include "threads/thread.h"
+#include "lib/algori.h"
 
 /* Initializes semaphore SEMA to VALUE.  A semaphore is a
    nonnegative integer along with two atomic operators for
@@ -214,8 +215,10 @@ lock_acquire (struct lock *lock)
          }
 
      Reason: thrd != NULL is the begin condition but not the end
-     condition.  The end condition is: another != NULL. So, we should
-     use lock to iterate donate chain, but not thread. */
+     condition.  The end condition is: another != NULL.  What's more,
+     in the final elem of chain, thrd->blocked == NULL.  So when using
+     thrd->blocked->holder will meet page fault.  We should use lock
+     to iterate donate chain, but not thread. */
   struct thread *cur = thread_current ();
   struct lock *chain;
   enum intr_level old_level;
@@ -309,8 +312,7 @@ void
 lock_get_higher_priority (struct lock *l, void *int_priority)
 {
   int *priority = int_priority;
-  if (l->priority > *priority)
-    *priority = l->priority;
+  max (*priority, *priority, l->priority);
 }
 
 /* One semaphore in a list. */

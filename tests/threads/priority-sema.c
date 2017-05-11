@@ -34,7 +34,6 @@ test_priority_sema (void)
     {
       sema_up (&sema);
       msg ("Back in main thread.");
-      /* putchar ('B'); */
     }
 }
 
@@ -43,5 +42,4 @@ priority_sema_thread (void *aux UNUSED)
 {
   sema_down (&sema);
   msg ("Thread %s woke up.", thread_name ());
-  /* putchar (thread_get_priority () - 20 + 'a'); */
 }
