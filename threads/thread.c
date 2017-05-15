@@ -286,9 +286,6 @@ thread_update_priority (struct thread *t, void *aux UNUSED)
     }
   else
     {
-      if(t == idle_thread)
-        return;
-
       fixed_t inv_priority = fp_addi (fp_divi (t->cpu, 4), (2 * t->nice));
       t->priority = PRI_MAX - fp_round (inv_priority);
       max (t->priority, t->priority, PRI_MIN);
@@ -468,18 +465,18 @@ thread_increase_recent_cpu (void)
 {
   struct thread *cur = thread_current ();
   if(cur != idle_thread)
-    cur->cpu = fp_addi (cur->cpu, 1);
+    cur->cpu = fp_add (cur->cpu, fp_one);
 }
 
 void
 thread_update_recent_cpu (struct thread *t, void *aux UNUSED)
 {
-  fixed_t avg_div;
+  fixed_t avg_2, avg_div;
 
   if (t != idle_thread)
     {
-      avg_div = fp_muli (load_avg, 2);
-      avg_div = fp_div (avg_div, fp_addi (avg_div, 1));
+      avg_2 = fp_muli (load_avg, 2);
+      avg_div = fp_div (avg_2, fp_add (avg_2, fp_one));
       t->cpu = fp_addi (fp_mul (avg_div, t->cpu), t->nice);
     }
 }
