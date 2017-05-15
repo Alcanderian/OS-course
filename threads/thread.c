@@ -289,8 +289,7 @@ thread_update_priority (struct thread *t, void *aux UNUSED)
     {
       fixed_t inv_priority = fp_addi (fp_divi (t->cpu, 4), (2 * t->nice));
       t->priority = PRI_MAX - fp_round (inv_priority);
-      /* max(t->priority, t->priority, PRI_MIN); */
-      /* min(t->priority, t->priority, PRI_MAX); */
+      max(t->priority, t->priority, PRI_MIN);
     }
 }
 
@@ -436,7 +435,7 @@ thread_set_nice (int nice)
 
   cur->nice = nice;
   thread_update_priority (cur, NULL);
-  thread_preempt ();
+  thread_yield ();
 }
 
 /* Returns the current thread's nice value. */
@@ -467,7 +466,7 @@ thread_increase_recent_cpu (void)
 {
   struct thread *cur = thread_current ();
   if(cur != idle_thread)
-    cur->cpu = fp_add (cur->cpu, fp_one);
+    cur->cpu = (fp_add (cur->cpu, fp_one));
 }
 
 void

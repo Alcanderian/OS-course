@@ -24,24 +24,24 @@
 typedef int fixed_t;
 #define FP_PRECISION 16
 
-#define fp_one (0x0100)
-#define fp_zero (0x0000)
+#define fp_one (i2fp (1))
+#define fp_zero (0)
 
 #define i2fp(n) ((fixed_t)((n) << FP_PRECISION))
 #define fp2i(x) ((x) >> FP_PRECISION)
-#define fp_round(x) (((x) >= 0) ? (fp2i((x) + (fp_one >> 1)))  \
-                                : (fp2i((x) - (fp_one >> 1))))
+#define fp_round(x) (((x) >= 0) ? (fp2i ((x) + (fp_one >> 1)))  \
+                                : (fp2i ((x) - (fp_one >> 1))))
 
 #define fp_add(x, y) ((x) + (y))
-#define fp_addi(x, n) ((x) + (i2fp(n)))
+#define fp_addi(x, n) ((x) + (i2fp (n)))
 
 #define fp_sub(x, y) ((x) - (y))
-#define fp_subi(x, n) ((x) - (i2fp(n)))
+#define fp_subi(x, n) ((x) - (i2fp (n)))
 
-#define fp_mul(x, y) ((fixed_t)(fp2i(((int64_t)(x)) * (y))))
+#define fp_mul(x, y) ((fixed_t)(fp2i (((int64_t)(x)) * (y))))
 #define fp_muli(x, n) ((x) * (n))
 
-#define fp_div(x, y) ((fixed_t)((i2fp((int64_t)(x))) / (y)))
+#define fp_div(x, y) ((fixed_t)((i2fp ((int64_t)(x))) / (y)))
 #define fp_divi(x, n) ((x) / (n))
 
 #endif /* lib/algori.h */
