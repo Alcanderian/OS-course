@@ -3,6 +3,7 @@
 
 /* Macro algorithm functions. */
 #define max(a, b, c) (a) = ((b) > (c)) ? (b) : (c)
+#define min(a, b, c) (a) = ((b) < (c)) ? (b) : (c)
 
 /* Fixed point number.
 
