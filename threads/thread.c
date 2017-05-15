@@ -294,8 +294,6 @@ thread_update_priority (struct thread *t, void *aux UNUSED)
 
       if (t->priority < PRI_MIN)
         t->priority = PRI_MIN;
-      else if (t->priority > PRI_MAX)
-        t->priority = PRI_MAX;
     }
 }
 
