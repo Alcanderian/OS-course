@@ -21,8 +21,8 @@
      Divide x by n:                                x / n
 
    Fixed point is implement for mlfqs, calculating LOAD_AVG and CPU_TIME. */
-typedef int fixed_t;
-#define FP_PRECISION 13
+typedef int64_t fixed_t;
+#define FP_PRECISION 16
 
 #define fp_one (i2fp (1))
 #define fp_zero (0)
@@ -38,10 +38,10 @@ typedef int fixed_t;
 #define fp_sub(x, y) ((x) - (y))
 #define fp_subi(x, n) ((x) - (i2fp (n)))
 
-#define fp_mul(x, y) ((fixed_t)(fp2i (((int64_t)(x)) * (y))))
+#define fp_mul(x, y) (fp2i ((x) * (y)))
 #define fp_muli(x, n) ((x) * (n))
 
-#define fp_div(x, y) ((fixed_t)((i2fp ((int64_t)(x))) / (y)))
+#define fp_div(x, y) ((i2fp (x)) / (y))
 #define fp_divi(x, n) ((x) / (n))
 
 #endif /* lib/algori.h */
