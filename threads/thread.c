@@ -435,7 +435,7 @@ thread_set_nice (int nice)
 
   cur->nice = nice;
   thread_update_priority (cur, NULL);
-  thread_yield ();
+  thread_preempt ();
 }
 
 /* Returns the current thread's nice value. */
