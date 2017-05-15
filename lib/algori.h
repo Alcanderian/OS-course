@@ -22,9 +22,9 @@
 
    Fixed point is implement for mlfqs, calculating LOAD_AVG and CPU_TIME. */
 typedef int64_t fixed_t;
-#define FP_PRECISION 16
+#define FP_PRECISION 24
 
-#define fp_one 0x00010000
+#define fp_one 0x01000000
 #define fp_zero 0x00000000
 
 #define i2fp(n) (((fixed_t) (n)) << FP_PRECISION)
