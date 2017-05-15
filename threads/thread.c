@@ -287,9 +287,10 @@ thread_update_priority (struct thread *t, void *aux UNUSED)
     }
   else
     {
+      if (t == idle_thread)
+        return;
       fixed_t inv_priority = fp_addi (fp_divi (t->cpu, 4), (2 * t->nice));
       t->priority = PRI_MAX - fp_round (inv_priority);
-      max(t->priority, t->priority, PRI_MIN);
     }
 }
 
@@ -449,14 +450,16 @@ thread_get_nice (void)
 int
 thread_get_load_avg (void)
 {
-  return fp_round (fp_muli (load_avg, 100));
+  fixed_t avg = fp_muli (load_avg, 100);
+  return fp_round (avg);
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */
 int
 thread_get_recent_cpu (void)
 {
-  return fp_round (fp_muli (thread_current ()->cpu, 100));
+  fixed_t cpu = fp_muli (thread_current ()->cpu, 100);
+  return fp_round (cpu);
 }
 
 void
@@ -488,10 +491,7 @@ thread_update_load_avg (void)
 int
 thread_ready_threads (void)
 {
-  int ready_threads = list_size (&ready_list);
-  if(thread_current () != idle_thread)
-    ++ready_threads;
-  return ready_threads;
+  return (list_size (&ready_list) + (thread_current () != idle_thread));
 }
 
 /* Idle thread.  Executes when no other thread is ready to run.
