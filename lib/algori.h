@@ -24,7 +24,7 @@
 typedef int64_t fixed_t;
 #define FP_PRECISION 16
 
-#define fp_one 0x00000100
+#define fp_one 0x00010000
 #define fp_zero 0x00000000
 
 #define i2fp(n) (((fixed_t)(n)) << FP_PRECISION)
