@@ -433,7 +433,7 @@ thread_set_nice (int nice)
   struct thread *cur = thread_current ();
 
   cur->nice = nice;
-  thread_update_priority (cur);
+  thread_update_priority (cur, NULL);
   thread_preempt ();
 }
 
