@@ -268,6 +268,7 @@ void
 thread_update_priority (struct thread *t, void *aux UNUSED)
 {
   struct thread *cur = thread_current ();
+  fixed_t inv_priority;
 
   if (!thread_mlfqs)
     {
@@ -289,8 +290,8 @@ thread_update_priority (struct thread *t, void *aux UNUSED)
       if(t == idle_thread)
         return;
 
-      fixed_t inv_priority = fp_addi (fp_divi (t->cpu, 4), (2 * t->nice));
-      t->priority = PRI_MAX - fp_round (inv_priority);
+      inv_priority = fp_round (fp_addi (fp_divi (t->cpu, 4), (2 * t->nice)));
+      t->priority = PRI_MAX - (int) inv_priority;
       if(t->priority < PRI_MIN)
         t->priority = PRI_MIN;
     }
