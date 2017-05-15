@@ -466,7 +466,7 @@ thread_increase_recent_cpu (void)
 {
   struct thread *cur = thread_current ();
   if(cur != idle_thread)
-    cur->cpu = fp_addi (cur->cpu, 1);
+    cur->cpu = fp_add (cur->cpu, fp_one);
 }
 
 void
@@ -477,7 +477,7 @@ thread_update_recent_cpu (struct thread *t, void *aux UNUSED)
   if (t != idle_thread)
     {
       avg_div = fp_muli (load_avg, 2);
-      avg_div = fp_div (avg_div, fp_addi (avg_div, 1));
+      avg_div = fp_div (avg_div, fp_add (avg_div, fp_one));
       t->cpu = fp_addi (fp_mul (avg_div, t->cpu), t->nice);
     }
 }
