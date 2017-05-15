@@ -248,8 +248,7 @@ thread_unblock (struct thread *t)
 
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
-  list_insert_ordered (&ready_list, &t->elem, thread_great_priority, NULL);
-  /* list_push_back(&ready_list, &t->elem); */
+  list_push_back (&ready_list, &t->elem);
   t->status = THREAD_READY;
   intr_set_level (old_level);
 }
@@ -289,8 +288,6 @@ thread_update_priority (struct thread *t, void *aux UNUSED)
     {
       fixed_t inv_priority = fp_addi (fp_divi (t->cpu, 4), (2 * t->nice));
       t->priority = PRI_MAX - fp_round (inv_priority);
-      if (t != cur)
-        list_sort (&ready_list, thread_great_priority, NULL);
     }
 }
 
@@ -360,9 +357,7 @@ thread_yield (void)
 
   old_level = intr_disable ();
   if (cur != idle_thread)
-    list_insert_ordered (&ready_list, &cur->elem, thread_great_priority,
-                         NULL);
-  /* list_push_back(&ready_list, &cur->elem); */
+    list_push_back (&ready_list, &cur->elem);
   cur->status = THREAD_READY;
   schedule ();
   intr_set_level (old_level);
@@ -381,6 +376,7 @@ thread_preempt (void) {
   ASSERT (!intr_context ());
 
   old_level = intr_disable ();
+  list_sort (&ready_list, thread_great_priority, NULL);
   maybe_next = thread_entry (list_begin (&ready_list));
   if (cur->priority < maybe_next->priority)
     thread_yield ();
@@ -610,6 +606,7 @@ alloc_frame (struct thread *t, size_t size)
 static struct thread *
 next_thread_to_run (void)
 {
+  list_sort (&ready_list, thread_great_priority, NULL);
   if (list_empty (&ready_list))
     return idle_thread;
   else
