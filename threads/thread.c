@@ -449,16 +449,14 @@ thread_get_nice (void)
 int
 thread_get_load_avg (void)
 {
-  fixed_t avg = fp_muli (load_avg, 100);
-  return fp_round (avg);
+  return fp_round (fp_muli (load_avg, 100));
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */
 int
 thread_get_recent_cpu (void)
 {
-  fixed_t cpu = fp_muli (thread_current ()->cpu, 100);
-  return fp_round (cpu);
+  return fp_round (fp_muli (thread_current ()->cpu, 100));
 }
 
 void
@@ -490,7 +488,10 @@ thread_update_load_avg (void)
 int
 thread_ready_threads (void)
 {
-  return (list_size (&ready_list) + (thread_current () != idle_thread));
+  int ready_threads = list_size (&ready_list);
+  if(thread_current () != idle_thread)
+    ++ready_threads;
+  return ready_threads;
 }
 
 /* Idle thread.  Executes when no other thread is ready to run.
