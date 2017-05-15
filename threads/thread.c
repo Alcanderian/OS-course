@@ -290,7 +290,7 @@ thread_update_priority (struct thread *t, void *aux UNUSED)
         return;
 
       fixed_t inv_priority = fp_addi (fp_divi (t->cpu, 4), (2 * t->nice));
-      t->priority = PRI_MAX - inv_priority;
+      t->priority = PRI_MAX - fp_round (inv_priority);
       if(t->priority < PRI_MIN)
         t->priority = PRI_MIN;
     }
