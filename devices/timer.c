@@ -188,11 +188,11 @@ timer_interrupt (struct intr_frame *args UNUSED)
       if (ticks % TIMER_FREQ == 0)
         {
           thread_update_load_avg ();
-          thread_foreach (thread_update_recent_cpu (), NULL);
+          thread_foreach (thread_update_recent_cpu, NULL);
         }
       if (ticks % TIME_SLICE == 0)
         {
-          thread_foreach (thread_update_priority (), NULL);
+          thread_foreach (thread_update_priority, NULL);
         }
     }
 
