@@ -288,7 +288,9 @@ thread_update_priority (struct thread *t, void *aux UNUSED)
   else
     {
       fixed_t inv_priority = fp_addi (fp_divi (t->cpu, 4), (2 * t->nice));
-      t->priority = PRI_MAX - fp2i (inv_priority);
+      t->priority, PRI_MAX - fp_round (inv_priority);
+      if (t != cur)
+        list_sort (&ready_list, thread_great_priority, NULL);
     }
 }
 
@@ -449,7 +451,7 @@ int
 thread_get_load_avg (void)
 {
   fixed_t avg = fp_muli (load_avg, 100);
-  return fp2i (avg);
+  return fp_round (avg);
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */
@@ -457,7 +459,7 @@ int
 thread_get_recent_cpu (void)
 {
   fixed_t cpu = fp_muli (thread_current ()->cpu, 100);
-  return fp2i (cpu);
+  return fp_round (cpu);
 }
 
 void
