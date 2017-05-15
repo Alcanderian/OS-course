@@ -268,13 +268,13 @@ void
 thread_update_priority (struct thread *t, void *aux UNUSED)
 {
   struct thread *cur = thread_current ();
-  enum intr_level old_level;
-
-  ASSERT(!intr_context ());
 
   if (!thread_mlfqs)
     {
       int lock_priority = PRI_MIN;
+      enum intr_level old_level;
+
+      ASSERT(!intr_context ());
 
       old_level = intr_disable ();
       lock_foreach (&t->holding_lock, lock_get_higher_priority, &lock_priority);
@@ -289,12 +289,9 @@ thread_update_priority (struct thread *t, void *aux UNUSED)
       if(t == idle_thread)
         return;
 
-      old_level = intr_disable ();
       fixed_t inv_priority = fp_addi (fp_divi (t->cpu, 4), (2 * t->nice));
-      t->priority = PRI_MAX - fp_round (inv_priority);
-      max (t->priority, t->priority, PRI_MIN);
-      intr_set_level (old_level);
-
+      min (inv_priority, fp_round (inv_priority), PRI_MAX);
+      t->priority = PRI_MAX - inv_priority;
     }
 }
 
