@@ -180,8 +180,8 @@ static void
 timer_interrupt (struct intr_frame *args UNUSED)
 {
   ticks++;
-  thread_foreach (thread_update_block, NULL);
   thread_tick ();
+  thread_foreach (thread_update_block, NULL);
   if (thread_mlfqs)
     {
       thread_increase_recent_cpu ();
@@ -191,9 +191,7 @@ timer_interrupt (struct intr_frame *args UNUSED)
           thread_foreach (thread_update_recent_cpu, NULL);
         }
       if (ticks % TIME_SLICE == 0)
-        {
-          thread_foreach (thread_update_priority, NULL);
-        }
+        thread_foreach (thread_update_priority, NULL);
     }
 }
 
