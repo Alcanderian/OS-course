@@ -23,10 +23,13 @@
 typedef int fixed_t;
 #define FP_PRECISION 16
 
+#define fp_one (0x0100)
+#define fp_zero (0x0000)
+
 #define i2fp(n) ((fixed_t)((n) << FP_PRECISION))
 #define fp2i(x) ((x) >> FP_PRECISION)
-#define fp_round(x) (((x) >= 0) ? (fp2i((x) + (i2fp(1) >> 1)))  \
-                                : (fp2i((x) - (i2fp(1) >> 1))))
+#define fp_round(x) (((x) >= 0) ? (fp2i((x) + (fp_one >> 1)))  \
+                                : (fp2i((x) - (fp_one >> 1))))
 
 #define fp_add(x, y) ((x) + (y))
 #define fp_addi(x, n) ((x) + (i2fp(n)))

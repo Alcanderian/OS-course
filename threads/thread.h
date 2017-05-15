@@ -4,6 +4,7 @@
 #include <debug.h>
 #include <list.h>
 #include <stdint.h>
+#include "lib/algori.h"
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -23,6 +24,9 @@ typedef int tid_t;
 #define PRI_MIN (0)                       /* Lowest priority. */
 #define PRI_DEFAULT (31)                  /* Default priority. */
 #define PRI_MAX (63)                      /* Highest priority. */
+
+/* Scheduling. */
+#define TIME_SLICE 4            /* # of timer ticks to give each thread. */
 
 /* A kernel thread or user process.
 
@@ -90,6 +94,9 @@ struct thread
     int prev_priority;                  /* Priority before being donated. */
     struct list holding_lock;           /* Lock list held by thread. */
     struct lock *waiting_lock;          /* The lock this thread is waiting. */
+
+    int nice;                           /* Nice value to other threads. */
+    fixed_t cpu;                        /* CPU time of thread. */
     /* By alcanderian */
     char name[16];                      /* Name (for debugging purposes). */
     uint8_t *stack;                     /* Saved stack pointer. */
@@ -159,5 +166,11 @@ int thread_get_nice (void);
 void thread_set_nice (int);
 int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
+/* By alcanderian */
+void thread_increase_recent_cpu (void);
+void thread_update_recent_cpu (struct thread *, void *);
+void thread_update_load_avg (void);
+int thread_ready_threads (void);
+/* By alcanderian */
 
 #endif /* threads/thread.h */

@@ -50,9 +50,9 @@ struct kernel_thread_frame
 static long long idle_ticks;    /* # of timer ticks spent idle. */
 static long long kernel_ticks;  /* # of timer ticks in kernel threads. */
 static long long user_ticks;    /* # of timer ticks in user programs. */
+static fixed_t load_avg;
 
 /* Scheduling. */
-#define TIME_SLICE 4            /* # of timer ticks to give each thread. */
 static unsigned thread_ticks;   /* # of timer ticks since last yield. */
 
 /* If false (default), use round-robin scheduler.
@@ -108,6 +108,7 @@ thread_start (void)
 {
   /* Create the idle thread. */
   struct semaphore idle_started;
+  load_avg = fp_zero;
   sema_init (&idle_started, 0);
   thread_create ("idle", PRI_MIN, idle, &idle_started);
 
@@ -286,7 +287,8 @@ thread_update_priority (struct thread *t, void *aux UNUSED)
     }
   else
     {
-
+      fixed_t inv_priority = fp_addi (fp_divi (t->cpu, 4), (2 * t->nice));
+      t->priority = PRI_MAX - fp_round (inv_priority);
     }
 }
 
@@ -426,33 +428,68 @@ thread_great_priority (const struct list_elem *a,
 
 /* Sets the current thread's nice value to NICE. */
 void
-thread_set_nice (int nice UNUSED)
+thread_set_nice (int nice)
 {
-  /* Not yet implemented. */
+  struct thread *cur = thread_current ();
+
+  cur->nice = nice;
+  thread_update_priority (cur);
+  thread_preempt ();
 }
 
 /* Returns the current thread's nice value. */
 int
 thread_get_nice (void)
 {
-  /* Not yet implemented. */
-  return 0;
+  return thread_current ()->nice;
 }
 
 /* Returns 100 times the system load average. */
 int
 thread_get_load_avg (void)
 {
-  /* Not yet implemented. */
-  return 0;
+  fixed_t avg = fp_muli (load_avg, 100);
+  return fp_round (avg);
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */
 int
 thread_get_recent_cpu (void)
 {
-  /* Not yet implemented. */
-  return 0;
+  fixed_t cpu = fp_muli (thread_current ()->cpu, 100);
+  return fp_round (cpu);
+}
+
+void
+thread_increase_recent_cpu (void)
+{
+  struct thread *cur = thread_current ();
+  if(cur != idle_thread)
+    cur->cpu = fp_add (cur->cpu, fp_one);
+}
+
+void
+thread_update_recent_cpu (struct thread *t, void *aux UNUSED)
+{
+  if (t != idle_thread)
+    t->cpu = (fp_addi (fp_mul (fp_div (fp_muli (load_avg, 2),
+                                       fp_add (fp_muli (load_avg, 2), fp_one)),
+                               t->cpu),
+                       t->nice));
+}
+
+void
+thread_update_load_avg (void)
+{
+  load_avg = (fp_divi (fp_addi (fp_muli (load_avg, 59),
+                                thread_ready_threads ()),
+                       60));
+}
+
+int
+thread_ready_threads (void)
+{
+  return (list_size (&ready_list) + (thread_current () != idle_thread));
 }
 
 /* Idle thread.  Executes when no other thread is ready to run.
@@ -539,6 +576,8 @@ init_thread (struct thread *t, const char *name, int priority)
   t->blocked_ticks = 0;
   strlcpy (t->name, name, sizeof t->name);
   t->stack = (uint8_t *) t + PGSIZE;
+  t->nice = fp_zero;
+  t->cpu = fp_zero;
   t->priority = priority;
   t->prev_priority = priority;
   t->waiting_lock = NULL;
