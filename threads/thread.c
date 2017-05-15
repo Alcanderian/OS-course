@@ -463,25 +463,21 @@ thread_increase_recent_cpu (void)
 {
   struct thread *cur = thread_current ();
   if(cur != idle_thread)
-    cur->cpu = fp_add (cur->cpu, fp_one);
+    cur->cpu = fp_addi (cur->cpu, 1);
 }
 
 void
 thread_update_recent_cpu (struct thread *t, void *aux UNUSED)
 {
+  fixed_t avg_2 = fp_muli (load_avg, 2);
   if (t != idle_thread)
-    t->cpu = (fp_addi (fp_mul (fp_div (fp_muli (load_avg, 2),
-                                       fp_add (fp_muli (load_avg, 2), fp_one)),
-                               t->cpu),
-                       t->nice));
+    t->cpu = fp_addi (fp_mul (fp_div (avg_2, fp_addi (avg_2, 1)), t->cpu), t->nice);
 }
 
 void
 thread_update_load_avg (void)
 {
-  load_avg = (fp_divi (fp_addi (fp_muli (load_avg, 59),
-                                thread_ready_threads ()),
-                       60));
+  load_avg = fp_divi (fp_addi (fp_muli (load_avg, 59), thread_ready_threads ()), 60);
 }
 
 int
