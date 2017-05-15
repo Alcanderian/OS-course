@@ -288,7 +288,7 @@ thread_update_priority (struct thread *t, void *aux UNUSED)
   else
     {
       fixed_t inv_priority = fp_addi (fp_divi (t->cpu, 4), (2 * t->nice));
-      t->priority, PRI_MAX - fp_round (inv_priority);
+      t->priority = PRI_MAX - fp_round (inv_priority);
       if (t != cur)
         list_sort (&ready_list, thread_great_priority, NULL);
     }
