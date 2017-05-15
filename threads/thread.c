@@ -268,18 +268,26 @@ void
 thread_update_priority (struct thread *t, void *aux UNUSED)
 {
   struct thread *cur = thread_current ();
-  int lock_priority = PRI_MIN;
-  enum intr_level old_level;
 
-  ASSERT (!intr_context ());
+  if (!thread_mlfqs)
+    {
+      int lock_priority = PRI_MIN;
+      enum intr_level old_level;
 
-  old_level = intr_disable ();
-  lock_foreach (&t->holding_lock, lock_get_higher_priority, &lock_priority);
-  max (t->priority, lock_priority, t->prev_priority);
-  /* It t != cur, it may in ready list or waiter list. */
-  if (t != cur)
-    list_sort (&ready_list, thread_great_priority, NULL);
-  intr_set_level (old_level);
+      ASSERT(!intr_context ());
+
+      old_level = intr_disable ();
+      lock_foreach (&t->holding_lock, lock_get_higher_priority, &lock_priority);
+      max(t->priority, lock_priority, t->prev_priority);
+      /* It t != cur, it may in ready list or waiter list. */
+      if (t != cur)
+        list_sort (&ready_list, thread_great_priority, NULL);
+      intr_set_level (old_level);
+    }
+  else
+    {
+
+    }
 }
 
 /* Returns the name of the running thread. */
