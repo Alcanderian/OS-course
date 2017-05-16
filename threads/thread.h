@@ -171,6 +171,7 @@ void thread_increase_recent_cpu (void);
 void thread_update_recent_cpu (struct thread *, void *);
 void thread_update_load_avg (void);
 int thread_ready_threads (void);
+void thread_ready_rebuild (void);
 /* By alcanderian */
 
 #endif /* threads/thread.h */
