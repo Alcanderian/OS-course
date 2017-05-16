@@ -282,9 +282,6 @@ thread_update_priority (struct thread *t, void *aux UNUSED)
       old_level = intr_disable ();
       lock_foreach (&t->holding_lock, lock_get_higher_priority, &lock_priority);
       max (t->priority, lock_priority, t->prev_priority);
-      /* It t != cur, it may in ready list or waiter list. */
-      if (t != cur)
-        list_sort (&ready_list, thread_great_priority, NULL);
       intr_set_level (old_level);
     }
   else

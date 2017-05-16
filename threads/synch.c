@@ -242,6 +242,7 @@ lock_acquire (struct lock *lock)
               chain->priority = cur->priority;
               thread_update_priority (chain->holder, NULL);
             }
+          thread_ready_rebuild ();
         }
       intr_set_level (old_level);
     }
