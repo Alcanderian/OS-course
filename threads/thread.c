@@ -269,8 +269,7 @@ thread_update_block (struct thread *t, void *aux UNUSED)
 void
 thread_update_priority (struct thread *t, void *aux UNUSED)
 {
-  struct thread *cur = thread_current ();
-  fixed_t inv_priority;
+  int inv_priority;
 
   if (!thread_mlfqs)
     {
