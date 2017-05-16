@@ -296,6 +296,7 @@ thread_update_priority (struct thread *t, void *aux UNUSED)
       t->priority = PRI_MAX - inv_priority;
 
       max (t->priority, t->priority, PRI_MIN);
+      min (t->priority, t->priority, PRI_MAX);
     }
 }
 
