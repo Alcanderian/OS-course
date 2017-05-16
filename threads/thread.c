@@ -277,11 +277,11 @@ thread_update_priority (struct thread *t, void *aux UNUSED)
       int lock_priority = PRI_MIN;
       enum intr_level old_level;
 
-      ASSERT(!intr_context ());
+      ASSERT (!intr_context ());
 
       old_level = intr_disable ();
       lock_foreach (&t->holding_lock, lock_get_higher_priority, &lock_priority);
-      max(t->priority, lock_priority, t->prev_priority);
+      max (t->priority, lock_priority, t->prev_priority);
       /* It t != cur, it may in ready list or waiter list. */
       if (t != cur)
         list_sort (&ready_list, thread_great_priority, NULL);
@@ -348,7 +348,7 @@ thread_exit (void)
      and schedule another process.  That process will destroy us
      when it calls thread_schedule_tail(). */
   intr_disable ();
-  list_remove (&thread_current()->allelem);
+  list_remove (&thread_current ()->allelem);
   thread_current ()->status = THREAD_DYING;
   schedule ();
   NOT_REACHED ();
