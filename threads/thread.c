@@ -285,7 +285,7 @@ thread_update_priority (struct thread *t, void *aux UNUSED)
     }
   else
     {
-      if(t == idle_thread)
+      if (t == idle_thread)
         return;
 
       inv_priority = fp2i (fp_addi (t->cpu >> 2, t->nice << 1));
@@ -466,7 +466,7 @@ void
 thread_increase_recent_cpu (void)
 {
   struct thread *cur = thread_current ();
-  if(cur != idle_thread)
+  if (cur != idle_thread)
     cur->cpu = fp_add (cur->cpu, fp_one);
 }
 
