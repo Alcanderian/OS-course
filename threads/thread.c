@@ -294,6 +294,8 @@ thread_update_priority (struct thread *t, void *aux UNUSED)
 
       inv_priority = fp2i (fp_addi (t->cpu >> 2, t->nice << 1));
       t->priority = PRI_MAX - inv_priority;
+
+      max (t->priority, t->priority, PRI_MIN);
     }
 }
 
