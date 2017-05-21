@@ -400,8 +400,6 @@ cond_wait (struct condition *cond, struct lock *lock)
 void
 cond_signal (struct condition *cond, struct lock *lock UNUSED)
 {
-  struct semaphore_elem *waiter;
-
   ASSERT (cond != NULL);
   ASSERT (lock != NULL);
   ASSERT (!intr_context ());
@@ -410,7 +408,7 @@ cond_signal (struct condition *cond, struct lock *lock UNUSED)
   if (!list_empty (&cond->waiters))
     {
       list_sort (&cond->waiters, sema_elem_great_priority, NULL);
-      sema_up (semaphore_entry (list_pop_front (&cond->waiters)));
+      sema_up (&semaphore_entry (list_pop_front (&cond->waiters)));
     }
 }
 
