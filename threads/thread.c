@@ -411,8 +411,15 @@ void
 thread_set_priority (int new_priority)
 {
   struct thread *cur = thread_current ();
-  cur->prev_priority = new_priority;
-  thread_update_priority (cur, NULL);
+
+  if (!thread_mlfqs)
+    {
+      cur->prev_priority = new_priority;
+      thread_update_priority (cur, NULL);
+    }
+  else
+    cur->priority = new_priority;
+
   thread_preempt ();
 }
 
