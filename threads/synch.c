@@ -33,7 +33,7 @@
 #include "threads/thread.h"
 #include "lib/algori.h"
 
-bool sema_elem_great_priority (const struct list_elem *a,
+bool semaphore_great_priority (const struct list_elem *a,
                                const struct list_elem *b, void *aux UNUSED);
 
 /* Initializes semaphore SEMA to VALUE.  A semaphore is a
