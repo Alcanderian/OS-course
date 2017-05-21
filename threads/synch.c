@@ -334,7 +334,7 @@ struct semaphore_elem
                                     struct semaphore_elem, elem)->semaphore)
 
 bool
-sema_elem_great_priority (const struct list_elem *a, const struct list_elem *b,
+semaphore_great_priority (const struct list_elem *a, const struct list_elem *b,
                           void *aux UNUSED)
 {
   return (thread_entry (list_front (&semaphore_entry (a).waiters))->priority >
@@ -407,7 +407,7 @@ cond_signal (struct condition *cond, struct lock *lock UNUSED)
 
   if (!list_empty (&cond->waiters))
     {
-      list_sort (&cond->waiters, sema_elem_great_priority, NULL);
+      list_sort (&cond->waiters, semaphore_great_priority, NULL);
       sema_up (&semaphore_entry (list_pop_front (&cond->waiters)));
     }
 }
