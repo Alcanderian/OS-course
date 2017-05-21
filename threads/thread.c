@@ -270,12 +270,11 @@ void
 thread_update_priority (struct thread *t, void *aux UNUSED)
 {
   int inv_priority;
+  int lock_priority = PRI_MIN;
+  enum intr_level old_level;
 
   if (!thread_mlfqs)
     {
-      int lock_priority = PRI_MIN;
-      enum intr_level old_level;
-
       ASSERT (!intr_context ());
 
       old_level = intr_disable ();
