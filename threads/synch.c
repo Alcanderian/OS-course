@@ -326,21 +326,19 @@ lock_get_higher_priority (struct lock *l, void *int_priority)
 struct semaphore_elem
   {
     struct list_elem elem;              /* List element. */
-    /* By alcanderian */
-    int priority;                       /* semaphore's priority */
-    /* By alcanderian */
     struct semaphore semaphore;         /* This semaphore. */
   };
 
 /* By alcanderian */
-#define sema_elem_entry(LIST_ELEM) (list_entry (LIST_ELEM,        \
-                                    struct semaphore_elem, elem))
+#define semaphore_entry(LIST_ELEM) (list_entry (LIST_ELEM,                   \
+                                    struct semaphore_elem, elem)->semaphore)
 
 bool
 sema_elem_great_priority (const struct list_elem *a, const struct list_elem *b,
                           void *aux UNUSED)
 {
-  return sema_elem_entry (a)->priority > sema_elem_entry (b)->priority;
+  return (thread_entry (list_front (&semaphore_entry (a).waiters))->priority >
+          thread_entry (list_front (&semaphore_entry (b).waiters))->priority);
 }
 /* By alcanderian */
 
@@ -386,7 +384,6 @@ cond_wait (struct condition *cond, struct lock *lock)
   ASSERT (lock_held_by_current_thread (lock));
 
   sema_init (&waiter.semaphore, 0);
-  waiter.priority = thread_current ()->priority;
   list_push_back (&cond->waiters, &waiter.elem);
   lock_release (lock);
   sema_down (&waiter.semaphore);
@@ -414,7 +411,6 @@ cond_signal (struct condition *cond, struct lock *lock UNUSED)
     {
       list_sort (&cond->waiters, sema_elem_great_priority, NULL);
       waiter = sema_elem_entry (list_pop_front (&cond->waiters));
-      waiter->priority = PRI_MIN;
       sema_up (&waiter->semaphore);
     }
 }
