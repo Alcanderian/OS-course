@@ -269,7 +269,6 @@ thread_update_block (struct thread *t, void *aux UNUSED)
 void
 thread_update_priority (struct thread *t, void *aux UNUSED)
 {
-  int inv_priority;
   int lock_priority = PRI_MIN;
   enum intr_level old_level;
 
@@ -283,16 +282,22 @@ thread_update_priority (struct thread *t, void *aux UNUSED)
       intr_set_level (old_level);
     }
   else
-    {
-      if (t == idle_thread)
-        return;
+    t->priority = t->prev_priority;
+}
 
-      inv_priority = fp2i (fp_addi (t->cpu >> 2, t->nice << 1));
-      t->priority = PRI_MAX - inv_priority;
+void
+thread_mlfqs_priority  (struct thread *t, void *aux UNUSED)
+{
+  int inv_priority;
 
-      max (t->priority, t->priority, PRI_MIN);
-      min (t->priority, t->priority, PRI_MAX);
-    }
+  if (t == idle_thread)
+    return;
+
+  inv_priority = fp2i (fp_addi (t->cpu >> 2, t->nice << 1));
+  t->priority = PRI_MAX - inv_priority;
+
+  max (t->priority, t->priority, PRI_MIN);
+  min (t->priority, t->priority, PRI_MAX);
 }
 
 /* Returns the name of the running thread. */
@@ -411,13 +416,8 @@ thread_set_priority (int new_priority)
 {
   struct thread *cur = thread_current ();
 
-  if (!thread_mlfqs)
-    {
-      cur->prev_priority = new_priority;
-      thread_update_priority (cur, NULL);
-    }
-  else
-    cur->priority = new_priority;
+  cur->prev_priority = new_priority;
+  thread_update_priority (cur, NULL);
 
   thread_preempt ();
 }
@@ -443,7 +443,7 @@ thread_set_nice (int nice)
   struct thread *cur = thread_current ();
 
   cur->nice = nice;
-  thread_update_priority (cur, NULL);
+  thread_mlfqs_priority (cur, NULL);
   thread_preempt ();
 }
 

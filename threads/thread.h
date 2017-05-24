@@ -138,6 +138,7 @@ void thread_unblock (struct thread *);
 /* By alcanderian */
 void thread_update_block (struct thread *, void *);
 void thread_update_priority (struct thread *, void *);
+void thread_mlfqs_priority  (struct thread *, void *);
 /* By alcanderian */
 
 struct thread *thread_current (void);

@@ -192,7 +192,7 @@ timer_interrupt (struct intr_frame *args UNUSED)
         }
       if (ticks % TIME_SLICE == 0)
         {
-          thread_foreach (thread_update_priority, NULL);
+          thread_foreach (thread_mlfqs_priority, NULL);
           thread_ready_rebuild ();
         }
     }
