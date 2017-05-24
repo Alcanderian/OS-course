@@ -41,9 +41,8 @@ test_mlfqs_block (void)
     continue;
 
   msg ("Main thread releasing lock.");
-  printf("ticks - %d\n", timer_ticks ());
   lock_release (&lock);
-  printf("ticks - %d\n", timer_ticks ());
+
   msg ("Block thread should have already acquired lock.");
 }
 
