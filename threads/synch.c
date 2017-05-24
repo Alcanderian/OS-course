@@ -230,8 +230,7 @@ lock_acquire (struct lock *lock)
   ASSERT (!intr_context ());
   ASSERT (!lock_held_by_current_thread (lock));
 
-  if (!thread_mlfqs)
-    {
+
       old_level = intr_disable ();
       if (lock->holder != NULL)
         {
@@ -245,7 +244,7 @@ lock_acquire (struct lock *lock)
           thread_ready_rebuild ();
         }
       intr_set_level (old_level);
-    }
+
 
   sema_down (&lock->semaphore);
   lock->holder = cur;
