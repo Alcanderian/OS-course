@@ -20,17 +20,17 @@
 static void block_thread (void *lock_);
 
 void
-test_mlfqs_block (void) 
+test_mlfqs_block (void)
 {
   int64_t start_time;
   struct lock lock;
-  
+
   ASSERT (thread_mlfqs);
 
   msg ("Main thread acquiring lock.");
   lock_init (&lock);
   lock_acquire (&lock);
-  
+
   msg ("Main thread creating block thread, sleeping 25 seconds...");
   thread_create ("block", PRI_DEFAULT, block_thread, &lock);
   timer_sleep (25 * TIMER_FREQ);
@@ -41,13 +41,14 @@ test_mlfqs_block (void)
     continue;
 
   msg ("Main thread releasing lock.");
+  printf("ticks - %d\n", timer_ticks ());
   lock_release (&lock);
-
+  printf("ticks - %d\n", timer_ticks ());
   msg ("Block thread should have already acquired lock.");
 }
 
 static void
-block_thread (void *lock_) 
+block_thread (void *lock_)
 {
   struct lock *lock = lock_;
   int64_t start_time;
