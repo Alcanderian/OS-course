@@ -458,14 +458,16 @@ thread_get_nice (void)
 int
 thread_get_load_avg (void)
 {
-  return fp2i (fp_muli (load_avg, 100));
+  fixed_t fixed_avg = fp_muli (load_avg, 100);
+  return fp_round (fixed_avg);
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */
 int
 thread_get_recent_cpu (void)
 {
-  return fp2i (fp_muli (thread_current ()->cpu, 100));
+  fixed_t fixed_cpu = fp_muli (thread_current ()->cpu, 100);
+  return fp_round (fixed_cpu);
 }
 
 void
