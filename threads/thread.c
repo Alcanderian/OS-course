@@ -418,7 +418,6 @@ thread_set_priority (int new_priority)
 
   cur->prev_priority = new_priority;
   thread_update_priority (cur, NULL);
-
   thread_preempt ();
 }
 
